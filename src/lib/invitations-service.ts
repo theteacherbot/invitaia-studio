@@ -63,8 +63,8 @@ export async function saveInvitation({
     .insert({
       event_type_slug: template.id,
       event_type_name: template.name,
-      form_data: data,
-      w4h1,
+      form_data: data as never,
+      w4h1: w4h1 as never,
     })
     .select()
     .single();
