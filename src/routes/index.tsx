@@ -35,6 +35,22 @@ function Index() {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const template = getTemplate(selectedId);
 
+  useEffect(() => {
+    const raw = sessionStorage.getItem("invitaia:prefill");
+    if (!raw) return;
+    sessionStorage.removeItem("invitaia:prefill");
+    try {
+      const { templateId, data, step: s } = JSON.parse(raw);
+      if (templateId && getTemplate(templateId)) {
+        setSelectedId(templateId);
+        setFormData(data ?? {});
+        setStep(s === "form" ? "form" : "result");
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[var(--gradient-hero)]">
       <Toaster position="top-center" />
@@ -45,8 +61,9 @@ function Index() {
           </div>
           <span className="font-display text-lg font-semibold tracking-tight">INVITAIA</span>
         </div>
-        <nav className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-          Studio
+        <nav className="flex items-center gap-6 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <span className="text-foreground">Studio</span>
+          <Link to="/projects" className="hover:text-foreground">Mis Proyectos</Link>
         </nav>
       </header>
 
