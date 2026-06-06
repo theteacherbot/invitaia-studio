@@ -42,7 +42,7 @@ export function ResultView({ template, data, onBack }: Props) {
     if (!qrUrl || savedId) return;
     saveInvitation({ template, data, qrPayload, qrDataUrl: qrUrl })
       .then((res) => {
-        setSavedId(res.event.id);
+        setSavedId(res.project.id);
         toast.success("Invitación guardada en tu biblioteca");
       })
       .catch((err) => {
