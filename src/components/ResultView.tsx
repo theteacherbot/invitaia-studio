@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { EventTemplate } from "@/lib/event-templates";
 import { saveInvitation } from "@/lib/invitations-service";
+import { useGeneratedImage } from "@/hooks/use-generated-image";
 
 interface Props {
   template: EventTemplate;
@@ -18,7 +19,14 @@ export function ResultView({ template, data, onBack }: Props) {
   const prompt = template.buildPrompt(data);
   const [qrUrl, setQrUrl] = useState<string>("");
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [promptId, setPromptId] = useState<string | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  const { status: imageStatus, image } = useGeneratedImage({
+    projectId: savedId,
+    promptId,
+    prompt,
+  });
 
   const qrPayload = {
     rsvp: true,
