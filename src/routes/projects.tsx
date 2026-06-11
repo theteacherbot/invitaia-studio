@@ -118,7 +118,20 @@ function ProjectsPage() {
                 p.form_data?.titulo ||
                 p.event_type_name;
               return (
-                <Card key={p.id} className="flex flex-col p-5">
+                <Card key={p.id} className="flex flex-col overflow-hidden p-0">
+                  {p.cover_url ? (
+                    <img
+                      src={p.cover_url}
+                      alt={title}
+                      className="h-40 w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-40 w-full items-center justify-center bg-muted text-4xl">
+                      {t?.icon ?? "✨"}
+                    </div>
+                  )}
+                  <div className="flex flex-1 flex-col p-5">
                   <div className="flex items-start justify-between">
                     <div className="text-3xl">{t?.icon ?? "✨"}</div>
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
