@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import {
   deleteProject,
   duplicateProject,
-  listProjects,
-  type ProjectDB,
+  listProjectsWithCover,
+  type ProjectWithCoverDB,
 } from "@/lib/invitations-service";
 import { getTemplate } from "@/lib/event-templates";
 
