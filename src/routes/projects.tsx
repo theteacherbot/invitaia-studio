@@ -24,10 +24,10 @@ export const Route = createFileRoute("/projects")({
 
 function ProjectsPage() {
   const navigate = useNavigate();
-  const [projects, setProjects] = useState<ProjectDB[] | null>(null);
+  const [projects, setProjects] = useState<ProjectWithCoverDB[] | null>(null);
 
   const refresh = () => {
-    listProjects()
+    listProjectsWithCover()
       .then(setProjects)
       .catch((e) => {
         console.error(e);
@@ -38,7 +38,7 @@ function ProjectsPage() {
 
   useEffect(refresh, []);
 
-  const onView = (p: ProjectDB) => {
+  const onView = (p: ProjectWithCoverDB) => {
     sessionStorage.setItem(
       "invitaia:prefill",
       JSON.stringify({ templateId: p.event_type_slug, data: p.form_data, step: "result" }),
@@ -46,7 +46,7 @@ function ProjectsPage() {
     navigate({ to: "/" });
   };
 
-  const onDuplicate = async (p: ProjectDB) => {
+  const onDuplicate = async (p: ProjectWithCoverDB) => {
     try {
       await duplicateProject(p.id);
       toast.success("Proyecto duplicado");
@@ -57,7 +57,7 @@ function ProjectsPage() {
     }
   };
 
-  const onDelete = async (p: ProjectDB) => {
+  const onDelete = async (p: ProjectWithCoverDB) => {
     if (!confirm(`¿Eliminar "${p.event_type_name}"?`)) return;
     try {
       await deleteProject(p.id);
