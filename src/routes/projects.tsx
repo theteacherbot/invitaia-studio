@@ -155,6 +155,7 @@ function ProjectsPage() {
                       Eliminar
                     </Button>
                   </div>
+                  </div>
                 </Card>
               );
             })}
