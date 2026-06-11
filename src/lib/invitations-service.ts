@@ -163,12 +163,13 @@ export async function listProjectsWithCover(): Promise<ProjectWithCoverDB[]> {
     .order("created_at", { ascending: false });
   if (error) throw error;
   type Row = ProjectDB & { generated_images?: Array<{ url: string; created_at: string }> };
-  return (data ?? []).map((row: Row) => {
-    const imgs = row.generated_images ?? [];
+  return (data ?? []).map((row) => {
+    const r = row as unknown as Row;
+    const imgs = r.generated_images ?? [];
     const latest = imgs.length
       ? [...imgs].sort((a, b) => (a.created_at < b.created_at ? 1 : -1))[0]
       : null;
-    const { generated_images: _omit, ...project } = row;
+    const { generated_images: _omit, ...project } = r;
     return { ...(project as ProjectDB), cover_url: latest?.url ?? null };
   });
 }
