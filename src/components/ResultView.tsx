@@ -51,6 +51,7 @@ export function ResultView({ template, data, onBack }: Props) {
     saveInvitation({ template, data, qrPayload, qrDataUrl: qrUrl })
       .then((res) => {
         setSavedId(res.project.id);
+        setPromptId(res.prompt.id);
         toast.success("Invitación guardada en tu biblioteca");
       })
       .catch((err) => {
