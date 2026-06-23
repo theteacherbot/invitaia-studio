@@ -1076,6 +1076,7 @@
             
             // Generar prompt
             currentPrompt = generatePrompt(selectedTemplate, data);
+            console.log('Prompt generado a partir de datos de formulario:', currentPrompt);
             
             // Generar código QR real usando la librería QRCode
             try {
@@ -1120,14 +1121,66 @@
                 instagram: data.instagram || "",
                 whatsapp: data.whatsapp || ""
             };
-            
+
+            const eventData = {
+                ...getWhoData(template, data),
+                ...social,
+                evento: template.name,
+                tema: data.tema || data.tipo || data.descripcion || "",
+                mensaje: data.mensaje || data.notas || "",
+                mesaRegalos: data.mesaRegalos || "",
+                cuentaRegalo: data.cuentaRegalo || "",
+                fecha: data.fecha || "",
+                hora: data.hora || "",
+                lugar: data.lugar || data.ceremonia || data.recepcion || data.lugarRecepcion || "",
+                direccion: data.direccion || "",
+                confirmarAntes: data.fechaLimiteConfirmacion || "",
+                codigoVestimenta: data.codigoVestimenta || data.dresscode || "",
+                colores: data.colores || "",
+                descripcion: data.descripcion || "",
+                form_data: {}
+            };
+
+            Object.keys(data).forEach(key => {
+                if (data[key] !== undefined && data[key] !== null && data[key] !== '') {
+                    eventData.form_data[key] = data[key];
+                }
+            });
+
             return {
-                who: { ...getWhoData(template, data), ...social },
-                what: { evento: template.name },
-                when: { fecha: data.fecha, hora: data.hora },
-                where: { lugar: data.lugar },
-                why: { motivo: `Invitación para ${template.name}` },
-                how: { estilo: "Elegante" }
+                who: {
+                    ...getWhoData(template, data),
+                    ...social
+                },
+                what: {
+                    evento: template.name,
+                    tema: data.tema || data.tipo || data.descripcion || "",
+                    mensaje: data.mensaje || data.notas || "",
+                    mesaRegalos: data.mesaRegalos || "",
+                    cuentaRegalo: data.cuentaRegalo || ""
+                },
+                when: {
+                    fecha: data.fecha || "",
+                    hora: data.hora || "",
+                    confirmarAntes: data.fechaLimiteConfirmacion || ""
+                },
+                where: {
+                    lugar: data.lugar || "",
+                    direccion: data.direccion || "",
+                    ceremonia: data.ceremonia || "",
+                    recepcion: data.recepcion || "",
+                    lugarRecepcion: data.lugarRecepcion || ""
+                },
+                why: {
+                    motivo: data.mensaje || `Invitación para ${template.name}`
+                },
+                how: {
+                    estilo: data.tema ? `Estilo ${data.tema}` : "Elegante",
+                    codigoVestimenta: data.codigoVestimenta || data.dresscode || "",
+                    colores: data.colores || "",
+                    descripcion: data.descripcion || ""
+                },
+                form_data: eventData.form_data
             };
         }
 
@@ -1135,21 +1188,47 @@
         function getWhoData(template, data) {
             switch(template.id) {
                 case 'cumpleanos':
-                    return { celebrante: data.nombre, edad: data.edad };
+                    return {
+                        celebrante: data.nombre || "",
+                        edad: data.edad || ""
+                    };
                 case 'matrimonio':
-                    return { novia: data.novia, novio: data.novio };
+                    return {
+                        novia: data.novia || "",
+                        novio: data.novio || ""
+                    };
                 case 'quince':
-                    return { quinceanera: data.nombre };
+                    return {
+                        quinceanera: data.nombre || ""
+                    };
                 case 'graduacion':
-                    return { graduado: data.nombre, titulo: data.titulo, institucion: data.institucion };
+                    return {
+                        graduado: data.nombre || "",
+                        titulo: data.titulo || "",
+                        institucion: data.institucion || ""
+                    };
                 case 'comunion':
-                    return { comulgante: data.nombre, parroquia: data.parroquia };
+                    return {
+                        comulgante: data.nombre || "",
+                        parroquia: data.parroquia || ""
+                    };
                 case 'babyshower':
-                    return { mama: data.mama, bebe: data.bebe, genero: data.genero };
+                    return {
+                        mama: data.mama || "",
+                        papa: data.papa || "",
+                        bebe: data.bebe || "",
+                        genero: data.genero || ""
+                    };
                 case 'aniversario':
-                    return { protagonistas: data.personas, anios: data.anios };
+                    return {
+                        protagonistas: data.personas || "",
+                        anios: data.anios || ""
+                    };
                 case 'fiesta':
-                    return { anfitrion: data.anfitrion };
+                    return {
+                        anfitrion: data.anfitrion || "",
+                        titulo: data.titulo || ""
+                    };
                 default:
                     return {};
             }
@@ -1157,29 +1236,41 @@
 
         // Generar prompt para IA
         function generatePrompt(template, data) {
-            const subject = getPromptSubject(template, data);
-            return `${subject} Date ${data.fecha} at ${data.hora}, venue ${data.lugar || "—"}. Style: modern minimal luxury, photorealistic, high detail, 4k, editorial typography, Apple-like minimal luxury, gold accents on white and black.`;
+            const formData = data && data.form_data ? data.form_data : data || {};
+            const subject = getPromptSubject(template, formData);
+            const details = template.fields
+                .filter(field => formData[field.name] !== undefined && formData[field.name] !== null && formData[field.name] !== '')
+                .map(field => `${field.label}: ${formData[field.name]}`)
+                .join(', ');
+            const venue = formData.lugar || formData.ceremonia || formData.recepcion || formData.lugarRecepcion || "—";
+            const dateTime = [formData.fecha, formData.hora].filter(Boolean).join(' at ');
+
+            const prompt = `${subject}${details ? ` Details: ${details}.` : ''} Date: ${dateTime || 'TBD'}, venue: ${venue}. Style: modern minimal luxury, photorealistic, high detail, 4k, editorial typography, Apple-like minimal luxury, gold accents on white and black.`;
+
+            console.log('generatePrompt input:', template.id, formData);
+            console.log('Generated prompt:', prompt);
+            return prompt;
         }
 
         // Obtener sujeto del prompt según la plantilla
         function getPromptSubject(template, data) {
             switch(template.id) {
                 case 'cumpleanos':
-                    return `Elegant premium birthday invitation card for ${data.nombre} turning ${data.edad}. Theme: ${data.tema || "modern minimal"}.`;
+                    return `Elegant premium birthday invitation card for ${data.nombre || 'the guest'} turning ${data.edad || 'any age'}. Theme: ${data.tema || "modern minimal"}.`;
                 case 'matrimonio':
-                    return `Luxury wedding invitation for ${data.novia} & ${data.novio}. Ceremony at ${data.ceremonia}, reception at ${data.recepcion}.`;
+                    return `Luxury wedding invitation for ${data.novia || 'the couple'} & ${data.novio || ''}. Ceremony at ${data.ceremonia || 'the ceremony venue'}, reception at ${data.recepcion || 'the reception venue'}.`;
                 case 'quince':
-                    return `Sophisticated quinceañera invitation for ${data.nombre}. Theme: ${data.tema || "royal glamour"}.`;
+                    return `Sophisticated quinceañera invitation for ${data.nombre || 'the celebrant'}. Theme: ${data.tema || "royal glamour"}.`;
                 case 'graduacion':
-                    return `Premium graduation invitation for ${data.nombre}, graduating in ${data.titulo} at ${data.institucion}.`;
+                    return `Premium graduation invitation for ${data.nombre || 'the graduate'}, graduating in ${data.titulo || 'their degree'} at ${data.institucion || 'their institution'}.`;
                 case 'comunion':
-                    return `Refined first communion invitation for ${data.nombre} at ${data.parroquia}.`;
+                    return `Refined first communion invitation for ${data.nombre || 'the child'} at ${data.parroquia || 'the parish'}.`;
                 case 'babyshower':
-                    return `Tender baby shower invitation for ${data.mama}${data.bebe ? `, welcoming ${data.bebe}` : ""}.`;
+                    return `Tender baby shower invitation for ${data.mama || 'the mom'}${data.bebe ? `, welcoming ${data.bebe}` : ""}.`;
                 case 'aniversario':
-                    return `Sophisticated anniversary invitation celebrating ${data.anios} years of ${data.personas}.`;
+                    return `Sophisticated anniversary invitation celebrating ${data.anios || 'multiple'} years of ${data.personas || 'the couple'}.`;
                 case 'fiesta':
-                    return `Striking invitation for "${data.titulo}" hosted by ${data.anfitrion}${data.tema ? `, theme ${data.tema}` : ""}${data.dresscode ? `, dress code ${data.dresscode}` : ""}.`;
+                    return `Striking invitation for "${data.titulo || 'a special event'}" hosted by ${data.anfitrion || 'the host'}${data.tema ? `, theme ${data.tema}` : ""}${data.dresscode ? `, dress code ${data.dresscode}` : ""}.`;
                 default:
                     return `Elegant invitation for ${template.name}`;
             }
