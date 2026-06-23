@@ -1236,6 +1236,7 @@
 
         // Generar prompt para IA
         function generatePrompt(template, data) {
+                      // Extraer formData del objeto data (maneja ambos casos: directo y con form_data anidado)
             const formData = data && data.form_data ? data.form_data : data || {};
             const subject = getPromptSubject(template, formData);
             const details = template.fields
