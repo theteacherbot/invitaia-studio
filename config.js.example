@@ -1,0 +1,7 @@
+// Configuración de Supabase
+// Este archivo es una plantilla. Copia este archivo a config.js y agrega tus credenciales reales.
+
+const SUPABASE_CONFIG = {
+  URL: "https://tu-proyecto.supabase.co",
+  ANON_KEY: "tu-clave-anonima-publica-aqui"
+};
