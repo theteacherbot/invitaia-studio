@@ -910,10 +910,20 @@
             }
         ];
 
-        // Inicializar cliente Supabase con credenciales de config.js
-        const SUPABASE_URL = SUPABASE_CONFIG.URL;
-        const SUPABASE_KEY = SUPABASE_CONFIG.ANON_KEY;
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Inicializar cliente Supabase con credenciales de config.js (si existe)
+        const runtimeConfig = (typeof window !== 'undefined' && window.SUPABASE_CONFIG)
+            ? window.SUPABASE_CONFIG
+            : null;
+        const SUPABASE_URL = runtimeConfig && runtimeConfig.URL ? runtimeConfig.URL : "";
+        const SUPABASE_KEY = runtimeConfig && runtimeConfig.ANON_KEY ? runtimeConfig.ANON_KEY : "";
+        const hasSupabaseConfig = Boolean(SUPABASE_URL && SUPABASE_KEY && typeof supabase !== 'undefined');
+        const supabaseClient = hasSupabaseConfig
+            ? supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+            : null;
+
+        if (!hasSupabaseConfig) {
+            console.warn("Supabase no está configurado. El estudio funcionará sin guardado de proyectos.");
+        }
 
         let selectedTemplate = null;
         let currentData = null;
@@ -997,6 +1007,9 @@
 
         // Guardar la invitación en Supabase
         async function saveToSupabase(template, data, w4h1, promptText, qrDataUrl) {
+            if (!hasSupabaseConfig || !supabaseClient) {
+                return null;
+            }
             try {
                 // 1. Guardar el proyecto
                 const { data: project, error: projectErr } = await supabaseClient
@@ -1301,6 +1314,11 @@
         // Mostrar sección de proyectos
         async function showProjects(event) {
             if (event) event.preventDefault();
+
+            if (!hasSupabaseConfig || !supabaseClient) {
+                alert("La vista de proyectos requiere config.js con credenciales de Supabase.");
+                return;
+            }
             
             // Actualizar menú activo
             document.getElementById('nav-studio').classList.remove('active');
