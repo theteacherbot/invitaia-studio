@@ -1,3 +1,4 @@
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -84,12 +85,21 @@ function Index() {
 
             <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {EVENT_TEMPLATES.map((t) => (
-                <EventCard
+                <div
                   key={t.id}
-                  template={t}
-                  selected={selectedId === t.id}
-                  onSelect={() => setSelectedId(t.id)}
-                />
+                  onClick={() => {
+                    console.log("DIV CLICK", t.id);
+                    setSelectedId(t.id);
+                  }}
+                  style={{
+                    border: "2px solid red",
+                    padding: "20px",
+                    margin: "10px",
+                    cursor: "pointer",
+                  }}
+                >
+                  {t.name}
+                </div>
               ))}
             </div>
 

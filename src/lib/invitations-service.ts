@@ -129,6 +129,16 @@ export async function saveGeneratedImage(input: {
   url: string;
   provider?: string;
 }): Promise<GeneratedImageDB> {
+
+  console.log("[DB] saveGeneratedImage iniciado");
+
+  console.log("[DB] payload", {
+    project_id: input.projectId,
+    prompt_id: input.promptId ?? null,
+    url: input.url,
+    provider: input.provider ?? null,
+  });
+
   const { data, error } = await supabase
     .from("generated_images")
     .insert({
@@ -139,7 +149,12 @@ export async function saveGeneratedImage(input: {
     })
     .select()
     .single();
+
+  console.log("[DB] data:", data);
+  console.log("[DB] error:", error);
+
   if (error) throw error;
+
   return data as unknown as GeneratedImageDB;
 }
 
